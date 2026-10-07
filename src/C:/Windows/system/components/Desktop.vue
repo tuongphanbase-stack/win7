@@ -9,6 +9,7 @@
       :file-props="{ shadow: true }"
       :context-menu-extras="contextMenuExtras"
     />
+    <GadgetLayer />
   </div>
 </template>
 
@@ -16,14 +17,17 @@
 import { fitSize } from '@/styles/common';
 import { panelSize } from '@/styles/constants';
 import FilesContainer from '@/components/FilesContainer.vue';
+import GadgetLayer from '@/components/Gadgets/GadgetLayer.vue';
 import { resolveFileByPath } from '@/services/fs';
 import { openFile } from '@/services/wm';
 import { config } from '@/services/cnf';
+import { openGadgetGallery } from '@/services/gadgets';
 
 export default {
   name: 'Desktop',
   components: {
     FilesContainer,
+    GadgetLayer,
   },
   style({ className }) {
     return [
@@ -46,6 +50,7 @@ export default {
     },
     contextMenuExtras() {
       return {
+        Gadgets: openGadgetGallery,
         'Change Background': this.openChangeBackground,
       };
     },

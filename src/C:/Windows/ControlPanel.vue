@@ -53,9 +53,10 @@
       <template v-else-if="view === 'reset'">
         <h2>Reset this PC</h2>
         <p class="text">
-          Your files, folders, renames and the Recycle Bin are saved in this browser so they
-          are still here next time. Resetting removes everything you created or changed
-          and brings back the original desktop. The desktop background is kept.
+          Your files, folders, renames, the Recycle Bin and your desktop gadgets are saved
+          in this browser so they are still here next time. Resetting removes everything you
+          created or changed and brings back the original desktop and gadgets. The desktop
+          background is kept.
         </p>
         <button
           type="button"
@@ -75,6 +76,7 @@ import {
 } from '@/services/fs';
 import { openFile, openDialog } from '@/services/wm';
 import { clearSavedFiles } from '@/services/persist';
+import { clearSavedGadgets, openGadgetGallery } from '@/services/gadgets';
 
 const icon = (name) => (resolveFileByPath(`C:/Windows/system/icons/${name}.png`) || {}).data;
 
@@ -105,6 +107,12 @@ export default {
           desc: 'Change desktop background',
           icon: icon('background-capplet'),
           action: () => this.open('C:/Windows/ChangeBackground.vue'),
+        },
+        {
+          title: 'Desktop Gadgets',
+          desc: 'Add the Clock, Calendar and CPU Meter to your desktop',
+          icon: icon('gadgets'),
+          action: () => openGadgetGallery(),
         },
         {
           title: 'System',
@@ -169,6 +177,7 @@ export default {
       }).then((btn) => {
         if (btn === 'Reset') {
           clearSavedFiles();
+          clearSavedGadgets();
           // Leave the page before the next autosave can write the files back.
           window.location.reload();
         }
