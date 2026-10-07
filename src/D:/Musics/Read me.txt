@@ -1,0 +1,4 @@
+Put your own .mp3 files in src/D:/Musics in the repository to have them
+appear here and play in the Music Player.
+
+The original demo songs are not included because they are copyrighted.

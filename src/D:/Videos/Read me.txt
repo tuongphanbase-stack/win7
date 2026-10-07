@@ -1,0 +1,4 @@
+Put your own .mp4 files in src/D:/Videos in the repository to have them
+appear here and play in the Video Player.
+
+The original demo video is not included because it is copyrighted.

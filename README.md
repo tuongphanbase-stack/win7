@@ -1,20 +1,25 @@
-# Windows 7 on the web
+<div align="center">
+  <a href="https://nainemom.github.io/win7" target="_blank">
+    <img src="https://raw.githubusercontent.com/nainemom/win7/master/public/favicon.ico" height="150"/>
+    <h1><b> Microsoft Windows 7 Preview on Web </b></h1>
+  </a>
+  <p>Yet another OS preview via web technologies focused on Microsoft Windows 7.<p>
+  <hr />
+  <img src="https://raw.githubusercontent.com/nainemom/win7/master/screen-record.gif" height="281"/>
+</div>
 
-A fork of [nainemom/win7](https://github.com/nainemom/win7), a Windows 7
-desktop recreated in the browser (Vue 3 + Vite, Apache-2.0), with extra
-features added on top.
+## Setup
+```bash
+git clone https://github.com/nainemom/win7.git # clone the repo
+cd win7 # go to repo directory
+npm i # install project dependencies
+npm run dev # start the app on your browser + hot reload
+```
 
-## Status: partially restored
+## Contributing
+Pull requests are welcome! Checkout the [Issues](https://github.com/nainemom/win7/issues) tab to find `good first issue` labeled issues. Also for manual major changes, please open an issue first to discuss what you would like to change.
 
-The original repository was lost when its GitHub account was suspended. This
-repo only has:
+Please make sure to run `npm run lint` command before sending your PR!
 
-- `index.upstream-exact.html`: the page from the original upstream project
-- `UPSTREAM_README.md`: notes on the upstream project
-- `CUSTOM_CHANGES.md`: the list of custom features that were added (Explorer
-  navigation, Recycle Bin, Command Prompt, Control Panel, themes, gadgets and
-  more). **Their source code is missing.**
-- `RECOVERY_STATUS.md`: recovery notes
-
-To rebuild it, start from a fresh copy of the upstream project and re-add the
-features listed in `CUSTOM_CHANGES.md`.
+## License
+[Apache License 2.0](https://choosealicense.com/licenses/apache-2.0/)
