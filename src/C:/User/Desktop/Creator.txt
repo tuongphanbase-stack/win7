@@ -1,2 +1,6 @@
 Created by Amir Momenian <nainemom@gmail.com>
 Repo Address: https://github.com/nainemom/win7
+
+This copy adds a Command Prompt, Recycle Bin, Control Panel, better
+Explorer navigation and saved files:
+https://github.com/tuongphanbase-stack/win7

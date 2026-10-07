@@ -156,6 +156,83 @@ export const copyFileByPath = (pathFrom, pathTo) => {
   return true;
 };
 
+/* ---------- Recycle Bin ---------- */
+
+export const RECYCLE_BIN = 'C:/Recycle Bin';
+
+// path inside the bin -> where it was deleted from
+export const recycleOrigins = reactive({});
+
+export const isInRecycleBin = (path) => (path || '').startsWith(`${RECYCLE_BIN}/`);
+
+export const isRecycleBinEmpty = () => !files.list.some(
+  (f) => getPathDir(f.path) === RECYCLE_BIN && !getPathName(f.path).startsWith('.'),
+);
+
+const uniquePath = (dir, name) => {
+  const dot = name.lastIndexOf('.');
+  const hasExt = dot > 0;
+  const stem = hasExt ? name.slice(0, dot) : name;
+  const ext = hasExt ? name.slice(dot) : '';
+  let candidate = `${dir}/${name}`;
+  for (let i = 2; isPathExists(candidate); i += 1) {
+    candidate = `${dir}/${stem} (${i})${ext}`;
+  }
+  return candidate;
+};
+
+const renameTree = (from, to) => {
+  for (let i = files.list.length - 1; i >= 0; i -= 1) {
+    const p = files.list[i].path;
+    if (p === from || p.startsWith(`${from}/`)) {
+      files.list[i].path = to + p.slice(from.length);
+    }
+  }
+};
+
+// Moves a file or folder into the Recycle Bin instead of deleting it.
+export const recycleFileByPath = (path) => {
+  if (isInRecycleBin(path)) {
+    throw new Error(`${path} is already in the Recycle Bin!`);
+  }
+  if (getPathDir(path) === '' || path === RECYCLE_BIN || path.startsWith('C:/Windows/system')) {
+    throw new Error('Cannot delete system files!');
+  }
+  const binPath = uniquePath(RECYCLE_BIN, getPathName(path));
+  renameTree(path, binPath);
+  recycleOrigins[binPath] = path;
+  return binPath;
+};
+
+// Puts a recycled item back where it came from (or on the Desktop if that folder is gone).
+export const restoreFileByPath = (binPath) => {
+  const origin = recycleOrigins[binPath];
+  let targetDir = origin ? getPathDir(origin) : 'C:/User/Desktop';
+  if (!/^[A-Z]:$/.test(targetDir) && !isPathExists(targetDir)) {
+    targetDir = 'C:/User/Desktop';
+  }
+  const target = uniquePath(targetDir, origin ? getPathName(origin) : getPathName(binPath));
+  renameTree(binPath, target);
+  delete recycleOrigins[binPath];
+  return target;
+};
+
+export const deleteForeverByPath = (binPath) => {
+  for (let i = files.list.length - 1; i >= 0; i -= 1) {
+    const p = files.list[i].path;
+    if (p === binPath || p.startsWith(`${binPath}/`)) {
+      files.list.splice(i, 1);
+    }
+  }
+  delete recycleOrigins[binPath];
+};
+
+export const emptyRecycleBin = () => {
+  getDirectoryFiles(RECYCLE_BIN)
+    .filter((f) => !getPathName(f.path).startsWith('.'))
+    .forEach((f) => deleteForeverByPath(f.path));
+};
+
 export const searchFiles = (basePath, matcher, recursive = true) => getDirectoryFiles(
   basePath,
   recursive,

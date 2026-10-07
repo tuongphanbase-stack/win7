@@ -21,7 +21,6 @@
 <script>
 import {
   getDirectoryFiles,
-  deleteFileByPath,
   createNewFolder,
   createNewFile,
   fileObject,
@@ -29,6 +28,13 @@ import {
   isPathExists,
   copyFileByPath,
   moveFileByPath,
+  RECYCLE_BIN,
+  isInRecycleBin,
+  recycleFileByPath,
+  restoreFileByPath,
+  deleteForeverByPath,
+  emptyRecycleBin,
+  isRecycleBinEmpty,
 } from '@/services/fs';
 import {
   markedFiles,
@@ -161,6 +167,15 @@ export default {
       const selectedFiles = this.getSelectedFiles();
       return selectedFiles.some((file) => file.$el.contains(e.target));
     },
+    recycle(paths) {
+      paths.forEach((path) => {
+        try {
+          recycleFileByPath(path);
+        } catch (error) {
+          openDialog({ type: 'error', title: 'Delete File', content: error.message || String(error) });
+        }
+      });
+    },
     openContextMenu(e) {
       const selectedFiles = this.getSelectedFiles();
       const isOnFile = this.isEventOnFile(e);
@@ -170,19 +185,25 @@ export default {
         contextMenuItems = [
           ...contextMenuItems,
           'Refresh',
-          ...(this.staticPath ? ['Create New Folder', 'Create New Text File'] : []),
-          ...(this.staticPath && (markedFiles.copyList.length || markedFiles.cutList.length) ? ['Paste'] : []),
+          ...(this.staticPath && this.path !== RECYCLE_BIN ? ['Create New Folder', 'Create New Text File'] : []),
+          ...(this.staticPath && this.path !== RECYCLE_BIN
+            && (markedFiles.copyList.length || markedFiles.cutList.length) ? ['Paste'] : []),
+          ...(this.path === RECYCLE_BIN && !isRecycleBinEmpty() ? ['Empty Recycle Bin'] : []),
           ...Object.keys(this.contextMenuExtras),
         ];
       } else {
-        contextMenuItems = [
+        const inBin = selectedFiles.some((file) => isInRecycleBin(file.file.path));
+        contextMenuItems = inBin ? [
+          'Restore',
+          'Delete permanently',
+        ] : [
           ...contextMenuItems,
           'Open',
           'Delete',
           'Cut',
           'Copy',
         ];
-        if (selectedFiles.length === 1) {
+        if (selectedFiles.length === 1 && !inBin) {
           contextMenuItems = [
             ...contextMenuItems,
             'Rename',
@@ -194,7 +215,30 @@ export default {
         if (item === 'Open') {
           selectedFiles.forEach((file) => file.click(null));
         } else if (item === 'Delete') {
-          selectedFiles.forEach((file) => deleteFileByPath(file.file.path));
+          this.recycle(selectedFiles.map((file) => file.file.path));
+        } else if (item === 'Restore') {
+          selectedFiles.forEach((file) => restoreFileByPath(file.file.path));
+        } else if (item === 'Delete permanently') {
+          const paths = selectedFiles.map((file) => file.file.path);
+          openDialog({
+            type: 'warning',
+            title: 'Delete File',
+            content: paths.length === 1
+              ? `Are you sure you want to permanently delete "${getPathName(paths[0])}"?`
+              : `Are you sure you want to permanently delete these ${paths.length} items?`,
+            buttons: ['Yes', 'No'],
+          }).then((btn) => {
+            if (btn === 'Yes') paths.forEach((path) => deleteForeverByPath(path));
+          });
+        } else if (item === 'Empty Recycle Bin') {
+          openDialog({
+            type: 'warning',
+            title: 'Empty Recycle Bin',
+            content: 'Are you sure you want to permanently delete all items in the Recycle Bin?',
+            buttons: ['Yes', 'No'],
+          }).then((btn) => {
+            if (btn === 'Yes') emptyRecycleBin();
+          });
         } else if (item === 'Refresh') {
           this.$el.classList.add('refreshing');
           this.$nextTick(() => {

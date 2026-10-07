@@ -3,6 +3,7 @@ import VueComponentStyle from 'vue-component-style';
 import App from '@/App.vue';
 import * as $fs from '@/services/fs';
 import { log } from '@/utils/log';
+import { restoreAndWatch } from '@/services/persist';
 import files from './.files';
 
 files.forEach((file) => {
@@ -11,6 +12,9 @@ files.forEach((file) => {
 });
 
 log('Files', files);
+
+// Bring back the user's files from the last visit, then keep saving changes.
+restoreAndWatch();
 
 window.$fs = $fs;
 window.$app = createApp(App)
